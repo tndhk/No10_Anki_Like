@@ -1,8 +1,10 @@
+'use client';
+
 // src/components/ThemeInput.tsx
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const ThemeInput = () => {
+export default function ThemeInput() {
   const [theme, setTheme] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -46,9 +48,8 @@ const ThemeInput = () => {
           type="text"
           value={theme}
           onChange={(e) => setTheme(e.target.value)}
-          placeholder="例: 会議で使う表現"
-          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={loading}
+          placeholder="テーマを入力してください"
+          className="w-full p-2 border rounded-md"
         />
         <button
           type="submit"
@@ -60,6 +61,4 @@ const ThemeInput = () => {
       </form>
     </div>
   );
-};
-
-export default ThemeInput;
+}
