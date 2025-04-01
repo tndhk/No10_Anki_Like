@@ -1,11 +1,17 @@
 # app/services/ai_service.py
 import os
-import openai
 import uuid
+import json
+import re
 from typing import List, Dict, Any
+import google.generativeai as genai
+from dotenv import load_dotenv
 
-# OpenAI APIキーを環境変数から取得
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# 環境変数のロード
+load_dotenv()
+
+# Google Gemini API設定
+genai.configure(api_key=os.getenv("GOOGLE_GEMINI_API_KEY"))
 
 def generate_cards(theme: str, count: int = 5) -> List[Dict[str, Any]]:
     """
@@ -30,26 +36,51 @@ def generate_cards(theme: str, count: int = 5) -> List[Dict[str, Any]]:
         3. translation: 日本語訳
         4. situation: このフレーズが使われるビジネスシチュエーション（日本語）
         
-        JSON形式で返してください。
+        JSON形式で返してください。以下の形式で返答してください:
+        [
+          {{
+            "phrase": "フレーズ1",
+            "example": "例文1",
+            "translation": "翻訳1",
+            "situation": "状況1"
+          }},
+          {{
+            "phrase": "フレーズ2",
+            "example": "例文2",
+            "translation": "翻訳2",
+            "situation": "状況2"
+          }}
+        ]
+        
+        有効なJSONのみを返してください。余計な説明は不要です。
         """
         
-        # OpenAI APIを呼び出し
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that creates business English phrase cards for Japanese learners."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-        )
+        # Gemini モデルを選択（Pro または Flash をビジネスニーズに合わせて選択）
+        model = genai.GenerativeModel('gemini-pro')
+        
+        # Gemini APIを呼び出し
+        response = model.generate_content(prompt)
         
         # レスポンスからカード情報を抽出
-        content = response.choices[0].message.content
+        content = response.text
+        
+        # JSONを検出して抽出するヘルパー関数
+        def extract_json_from_text(text):
+            # JSONブロックを検出（```jsonや```の間のテキストも対応）
+            json_pattern = r'```(?:json)?\s*([\s\S]*?)\s*```'
+            match = re.search(json_pattern, text)
+            if match:
+                return match.group(1)
+            
+            # JSONブロックがなければ、テキスト全体をJSONとして解釈
+            return text
+        
+        # JSONテキストを抽出
+        json_content = extract_json_from_text(content)
         
         # 取得したJSONをパース
-        import json
         try:
-            card_data = json.loads(content)
+            card_data = json.loads(json_content)
             
             # レスポンスの形式が異なる場合に対応
             if isinstance(card_data, dict) and "cards" in card_data:
@@ -63,10 +94,10 @@ def generate_cards(theme: str, count: int = 5) -> List[Dict[str, Any]]:
             for card in cards:
                 card["id"] = str(uuid.uuid4())
             
-            return cards
+            return cards[:count]  # 指定された数のカードを返す
+            
         except json.JSONDecodeError:
             # JSONパースに失敗した場合、テキストを解析して構造化
-            import re
             cards = []
             
             # カードを分割するパターンを探す
