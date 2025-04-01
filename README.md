@@ -8,7 +8,7 @@ Business English Flash (BEF)は、AIが自動でビジネス英語カードを�
 
 ## 機能
 
-- AIによるカード自動生成
+- AIによるカード自動生成（Google Gemini API利用）
 - 音声読み上げ機能
 - 復習モード
 - 進捗確認
@@ -18,7 +18,7 @@ Business English Flash (BEF)は、AIが自動でビジネス英語カードを�
 
 - フロントエンド: Next.js + TailwindCSS
 - バックエンド: FastAPI
-- AI: OpenAI GPT-3.5 Turbo
+- AI: Google Gemini API
 - 音声: Google Cloud TTS
 - Docker環境
 
@@ -59,3 +59,10 @@ npm test
 cd backend
 pytest
 ```
+
+## Gemini APIキーの取得方法
+
+1. Google AI Studio (https://makersuite.google.com/) にアクセス
+2. Googleアカウントでログイン
+3. APIキーを取得
+4. 取得したAPIキーを `backend/.env` ファイルの `GOOGLE_GEMINI_API_KEY` に設定
