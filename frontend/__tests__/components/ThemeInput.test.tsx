@@ -1,4 +1,4 @@
-// __tests__/components/ThemeInput.test.tsx
+// frontend/__tests__/components/ThemeInput.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ThemeInput from '@/components/ThemeInput';
 import '@testing-library/jest-dom';
@@ -43,6 +43,17 @@ describe('ThemeInput Component', () => {
     expect(input).toHaveValue('プレゼンテーション');
   });
 
+  test('shows error when submitting empty theme', () => {
+    render(<ThemeInput />);
+    
+    // 空のままフォームを送信
+    const button = screen.getByText('AIカード自動生成');
+    fireEvent.click(button);
+    
+    // エラーメッセージが表示されるか
+    expect(screen.getByText('テーマを入力してください')).toBeInTheDocument();
+  });
+
   test('submits the form and calls the API', async () => {
     render(<ThemeInput />);
     
@@ -74,9 +85,6 @@ describe('ThemeInput Component', () => {
     // モックをエラーにオーバーライド
     (global.fetch as jest.Mock).mockRejectedValue(new Error('API Error'));
     
-    // alertのモック
-    const alertMock = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    
     render(<ThemeInput />);
     
     // テーマを入力してフォームを送信
@@ -86,11 +94,9 @@ describe('ThemeInput Component', () => {
     const button = screen.getByText('AIカード自動生成');
     fireEvent.click(button);
     
-    // エラーアラートが表示されることを確認
+    // エラーメッセージが表示されることを確認
     await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('カードの生成中にエラーが発生しました。もう一度お試しください。');
+      expect(screen.getByText('カードの生成中にエラーが発生しました。もう一度お試しください。')).toBeInTheDocument();
     });
-    
-    alertMock.mockRestore();
   });
 });

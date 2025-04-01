@@ -12,6 +12,7 @@ load_dotenv()
 
 # Google Gemini API設定
 genai.configure(api_key=os.getenv("GOOGLE_GEMINI_API_KEY"))
+MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash")  # デフォルト値を設定
 
 def generate_cards(theme: str, count: int = 5) -> List[Dict[str, Any]]:
     """
@@ -55,8 +56,8 @@ def generate_cards(theme: str, count: int = 5) -> List[Dict[str, Any]]:
         有効なJSONのみを返してください。余計な説明は不要です。
         """
         
-        # Gemini モデルを選択（Pro または Flash をビジネスニーズに合わせて選択）
-        model = genai.GenerativeModel('gemini-pro')
+        # Gemini モデルを選択
+        model = genai.GenerativeModel(MODEL_NAME)
         
         # Gemini APIを呼び出し
         response = model.generate_content(prompt)

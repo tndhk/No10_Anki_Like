@@ -1,4 +1,4 @@
-// src/app/page.tsx
+// frontend/src/app/page.tsx
 import ThemeInput from '@/components/ThemeInput';
 
 export default function Home() {
